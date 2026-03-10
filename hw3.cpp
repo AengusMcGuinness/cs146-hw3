@@ -1,9 +1,11 @@
+#include <cstdint>
 #include <unistd.h>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <map>
 #include <cstdlib>
+#include <cstdint>
 #include "pin.H"
 
 using std::ofstream;
@@ -78,6 +80,39 @@ VOID BPB_update(ADDRINT ins_ptr, bool taken)
 
 
 /* ===================================================================== */
+
+
+/* ===================================================================== */
+/* 2-bit Branch predictor (2-bit saturating counter from figure 2)       */
+/* ===================================================================== */
+
+struct automaton2 {
+    // Strongly Not taken, Weakly Not taken, Weakly Taken, Strongly Taken
+    enum State : uint8_t { SN, WN, WT, ST };
+
+    State state;
+    // Initialize in Strongly Not Taken
+    void init() {
+        state = SN;
+    }
+
+    bool predict() const {
+        return state >= WT;
+      }
+
+    void update(bool taken) {
+      if (taken) {
+          if (state != ST){
+              state = static_cast<State>(state + 1);
+          }
+      } else {
+          if (state != SN) {
+              state = static_cast<State>(state - 1);
+          }
+        }
+      }
+}
+
 
 
 /* ===================================================================== */
