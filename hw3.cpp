@@ -34,53 +34,8 @@ UINT64 CountSeen = 0;
 UINT64 CountTaken = 0;
 UINT64 CountCorrect = 0;
 
-/* ===================================================================== */
-/* 1-bit Branch predictor (using Branch Prediction Buffer),              */
-/* which is mentioned in cs246-lecture-speculation.pdf but with 1-bit    */
-/* ===================================================================== */
 #define SIZE 1024
 UINT64 mask = (SIZE-1);
-
-struct entry_one_bit
-{
-    bool prediction;
-
-} BPB_one_bit[SIZE];
-
-/* initialize the BPB, not taken by default*/
-VOID BPB_init()
-{
-    int i;
-
-    for(i = 0; i < SIZE; i++)
-    {
-        BPB_one_bit[i].prediction = false;
-    }
-}
-
-/* return the prediction for the given instruction */
-bool BPB_prediction(ADDRINT ins_ptr)
-{
-    UINT64 index;
-
-    index = mask & ins_ptr;
-    
-    return BPB_one_bit[index].prediction;
-}
-
-/* update the BPB entry */
-VOID BPB_update(ADDRINT ins_ptr, bool taken)
-{
-    UINT64 index;
-
-    index = mask & ins_ptr;
-
-    BPB_one_bit[index].prediction = taken;
-}
-
-
-/* ===================================================================== */
-
 
 /* ===================================================================== */
 /* 2-bit Branch predictor (2-bit saturating counter from figure 2)       */
@@ -111,6 +66,34 @@ struct automaton2 {
           }
         }
       }
+};
+
+automaton2 BPB[SIZE];
+
+VOID BPB_update(ADDRINT ins_ptr, bool taken)
+{
+    UINT64 index;
+    index = mask & ins_ptr;
+    BPB[index].update(taken);
+}
+
+/* return the prediction for the given instruction */
+bool BPB_prediction(ADDRINT ins_ptr)
+{
+    UINT64 index;
+    index = mask & ins_ptr;
+    return BPB[index].predict();
+}
+
+/* initialize the BPB, not taken by default*/
+VOID BPB_init()
+{
+    int i;
+
+    for(i = 0; i < SIZE; i++)
+    {
+        BPB[i].init();
+    }
 }
 
 
