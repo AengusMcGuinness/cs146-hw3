@@ -105,7 +105,7 @@ VOID predictor_init() {
 
   history_mask = (1UL << history_bits) - 1;
 
-  HRT = new hrt_entry[hrt_entries];
+  HRT = new bhr_entry[hrt_entries];
   PT = new automaton2[pt_entries];
 
   for (uint64_t i = 0; i < hrt_entries; i++) {
@@ -128,30 +128,14 @@ VOID predictor_update(ADDRINT ins_ptr, bool taken) {
   HRT[hrt_index].update(taken);
 }
 
-bool predictor_predict(ADDRINT ins_ptr) {
-  uint64_t hrt_index = static_cast<uint64_t>(ins_ptr >> 2) % hrt_entries;
-  
-  
+bool predictor_prediction(ADDRINT ins_ptr) {
+    // Get the index
+    uint64_t hrt_index = static_cast<uint64_t>(ins_ptr >> 2) % hrt_entries;
+    uint64_t history = HRT[hrt_index].history;
+    // The prediction from the finite automaton
+    return PT[history % pt_entries].predict();
   }
 
-// /* return the prediction for the given instruction */
-// bool BPB_prediction(ADDRINT ins_ptr)
-// {
-//     UINT64 index;
-//     index = mask & ins_ptr;
-//     return BPB[index].predict();
-// }
-
-// /* initialize the BPB, not taken by default*/
-// VOID BPB_init()
-// {
-//     int i;
-
-//     for(i = 0; i < SIZE; i++)
-//     {
-//         BPB[i].init();
-//     }
-// }
 
 /* ===================================================================== */
 
@@ -195,11 +179,11 @@ VOID br_predict(ADDRINT ins_ptr, INT32 taken) {
   }
 
   // count the correctly predicted branches
-  if (BPB_prediction(ins_ptr) == taken)
+  if (predictor_prediction(ins_ptr) == taken)
     CountCorrect++;
 
   // update branch prediction buffer
-  BPB_update(ins_ptr, taken);
+  predictor_update(ins_ptr, taken);
 
   if (CountSeen == KnobBranchLimit.Value()) {
     write_results(true);
