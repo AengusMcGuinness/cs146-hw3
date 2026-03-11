@@ -6,7 +6,7 @@ TOOL="part_b.so"
 MAX_JOBS=4
 jobcount=0
 
-for bench in "benchmarks/libquantum_O3 400 25" "benchmarks/dealII_O3 10"; do
+for bench in "../benchmarks/libquantum_O3 400 25" "../benchmarks/dealII_O3 10"; do
   for hrt in 64 128 256 512 1024 2048; do
     for pt in 4 8 16 32 64 128 256; do
 
