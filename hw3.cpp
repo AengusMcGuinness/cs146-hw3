@@ -162,9 +162,21 @@ VOID write_results(bool limit_reached) {
     out << "Reason: limit reached\n";
   else
     out << "Reason: fini\n";
+
+  out << "HistoryBits: " << history_bits << endl;
+  out << "HRTEntries: " << hrt_entries << endl;
+  out << "PTEntries: " << pt_entries << endl;
   out << "Count Seen: " << CountSeen << endl;
   out << "Count Taken: " << CountTaken << endl;
   out << "Count Correct: " << CountCorrect << endl;
+
+  if (CountSeen != 0) {
+    out << std::fixed << std::setprecision(6);
+    out << "Accuracy: " << (double) CountCorrect / (double) CountSeen << endl;
+    out << "Mispredictions: " << (CountSeen - CountCorrect) << endl;
+    out << "MispredictionRate: "
+        << (double) (CountSeen - CountCorrect) / (double) CountSeen << endl;
+  }
   out.close();
 }
 
